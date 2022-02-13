@@ -1,7 +1,3 @@
-import { atom } from "recoil";
-// import { User } from "firebase/auth";
+import React from "react";
 
-// export const currentUserAtom = atom<User>({
-//   key: "currentUserAtom",
-//   default: {} as User,
-// });
+export const LocaleContext = React.createContext({} as any);

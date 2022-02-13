@@ -1,8 +1,8 @@
 import { RiSearch2Line, RiLogoutCircleRLine, RiAddFill } from "react-icons/ri";
-import { ChangeEvent, useEffect, useState } from "react";
+import { ChangeEvent, useContext, useEffect, useState } from "react";
 import { useNavigate } from "react-router";
 import { Web3Storage } from "web3.storage";
-import CryptoJS from "crypto-js";
+import SHA256 from "crypto-js/sha256";
 import { MdDelete, MdFileDownload } from "react-icons/md";
 import { toast } from "react-toastify";
 import axios from "axios";
@@ -21,8 +21,10 @@ import { makeStorageClient } from "../../utils/storage";
 import { db, SEA } from "../../utils/db";
 import Loader from "../../components/Loader/Loader";
 import NoteModal from "../../components/Modal/NoteModal/NoteModal";
+import { LocaleContext } from "../../store/store";
 
 const Dashboard: React.FC = () => {
+  const locale = useContext(LocaleContext);
   const userName = localStorage.getItem("userName");
   const menuList = [
     {
@@ -65,7 +67,7 @@ const Dashboard: React.FC = () => {
       return "";
     }
 
-    const collection = CryptoJS.SHA256(
+    const collection = SHA256(
       JSON.stringify({
         data: localStorage.getItem("userName") || "",
         secret: import.meta.env.VITE_DB_HASH
@@ -81,14 +83,10 @@ const Dashboard: React.FC = () => {
     setLoading(true);
 
     const collection = await getDBCollection();
-    db.get(collection)
-      .get("files")
-      .get(tab)
-      .on(async (data) => {
-        console.log(data, "data");
+    Promise.race([(db.get(collection).get("files").get(tab) as any).then()])
+      .then(async (data) => {
         if (!data) return;
 
-        setLoading(true);
         try {
           delete data["_"];
           let filesData: any[] = await Promise.all(
@@ -110,12 +108,13 @@ const Dashboard: React.FC = () => {
         } catch (e) {
           console.log(e);
         }
+      })
+      .catch((error) => {
+        console.log(error);
+      })
+      .finally(() => {
         setLoading(false);
       });
-
-    setTimeout(() => {
-      setLoading(false);
-    }, 10000);
   };
 
   const storeWithProgress = async (
@@ -362,7 +361,9 @@ const Dashboard: React.FC = () => {
               onClick={() => updateSelectedTab(0)}
             >
               <FaRegFileArchive className="text-xl" />
-              <p className="ml-2 mobile:hidden">Documents</p>
+              <p className="ml-2 mobile:hidden">
+                {locale.dashboard?.documents}
+              </p>
             </div>
             <div
               className={`flex flex-row items-center px-4 py-2 my-2 rounded cursor-pointer ${
@@ -371,7 +372,7 @@ const Dashboard: React.FC = () => {
               onClick={() => updateSelectedTab(1)}
             >
               <FaRegFileImage className="text-xl" />
-              <p className="ml-2 mobile:hidden">Images</p>
+              <p className="ml-2 mobile:hidden">{locale.dashboard?.images}</p>
             </div>
             <div
               className={`flex flex-row items-center px-4 py-2 my-2 rounded cursor-pointer ${
@@ -380,7 +381,7 @@ const Dashboard: React.FC = () => {
               onClick={() => updateSelectedTab(2)}
             >
               <FaRegFileVideo className="text-xl" />
-              <p className="ml-2 mobile:hidden">Videos</p>
+              <p className="ml-2 mobile:hidden">{locale.dashboard?.videos}</p>
             </div>
             <div
               className={`flex flex-row items-center px-4 py-2 my-2 rounded cursor-pointer ${
@@ -389,7 +390,7 @@ const Dashboard: React.FC = () => {
               onClick={() => updateSelectedTab(3)}
             >
               <FaRegFileAudio className="text-xl" />
-              <p className="ml-2 mobile:hidden">Audios</p>
+              <p className="ml-2 mobile:hidden">{locale.dashboard?.audios}</p>
             </div>
             <div
               className={`flex flex-row items-center px-4 py-2 my-2 rounded cursor-pointer ${
@@ -398,7 +399,7 @@ const Dashboard: React.FC = () => {
               onClick={() => updateSelectedTab(4)}
             >
               <SiMicrosoftonenote className="text-xl mobile:scale-125" />
-              <p className="ml-2 mobile:hidden">Notes</p>
+              <p className="ml-2 mobile:hidden">{locale.dashboard?.notes}</p>
             </div>
           </div>
         </div>
@@ -429,7 +430,17 @@ const Dashboard: React.FC = () => {
                     <>
                       <RiAddFill />
                       <p className="pl-1 text-sm capitalize">
-                        Upload {menuList[selected].name}
+                        {selected === 0
+                          ? locale.dashboard?.upload_document
+                          : selected === 1
+                          ? locale.dashboard?.upload_image
+                          : selected === 2
+                          ? locale.dashboard?.upload_video
+                          : selected === 3
+                          ? locale.dashboard?.upload_video
+                          : selected === 4
+                          ? locale.dashboard?.upload_audio
+                          : locale.dashboard?.add_note}
                       </p>
                     </>
                   )}
@@ -446,7 +457,9 @@ const Dashboard: React.FC = () => {
             </div>
             {files.length === 0 ? (
               <div className="w-full h-full flex flex-row justify-center items-center">
-                <p className="text-gray-400">No files found.</p>
+                <p className="text-gray-400">
+                  {locale.dashboard?.no_files_found}
+                </p>
               </div>
             ) : null}
             <div

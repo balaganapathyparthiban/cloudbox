@@ -1,4 +1,6 @@
-import KeepPNG from "../../assets/image/keep.png";
+import KeepPNG from "/images/keep.png";
+import { LocaleContext } from "../../store/store";
+import { useContext } from "react";
 
 interface ILogo {
   textClass?: string;
@@ -6,6 +8,8 @@ interface ILogo {
 }
 
 const Logo: React.FC<ILogo> = (props) => {
+  const locale = useContext(LocaleContext);
+
   return (
     <div className="w-auto h-full flex flex-row items-center">
       <div className="w-12 mobile:w-10 h-full">
