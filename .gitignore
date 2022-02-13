@@ -26,6 +26,6 @@ yarn-error.log*
 
 .openzeppelin/.session
 
-.firebase
+/.firebase
 .firebaserc
 firebase.json
