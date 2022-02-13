@@ -77,7 +77,7 @@ const Landing: React.FC = () => {
           </LoginModal>
         </Header>
         <div className="w-full h-[calc(100%-96px)] flex flex-row mobile:flex-col mobile:overflow-y-auto bg-gray-100">
-          <div className="w-2/5 mobile:w-full h-full mobile:h-auto pl-12 mobile:px-4 mobile:mt-4 flex flex-col justify-center">
+          <div className="w-2/5 mobile:w-full h-full mobile:h-auto pl-12 mobile:px-4 mobile:mt-6 flex flex-col justify-center">
             <p className="text-6xl mobile:text-4xl font-semibold">
               {locale.landing?.title}
             </p>
@@ -88,7 +88,7 @@ const Landing: React.FC = () => {
               {locale.landing?.description}
             </p>
           </div>
-          <div className="pl-6 mobile:pl-4 pr-4 py-4 w-3/5 mobile:w-full h-full mobile:h-auto grid grid-cols-3 grid-rows-3 gap-2">
+          <div className="pl-6 mobile:pl-4 pr-4 py-4 mobile:pt-6 w-3/5 mobile:w-full h-full mobile:h-auto grid grid-cols-3 grid-rows-3 gap-2">
             {appDetailsGridList.map((detail, index) => {
               return (
                 <div

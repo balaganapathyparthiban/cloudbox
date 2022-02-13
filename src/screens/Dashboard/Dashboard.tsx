@@ -352,7 +352,7 @@ const Dashboard: React.FC = () => {
         </Header>
       </div>
       <div className="w-full h-[calc(100%-96px)] overflow-hidden bg-white flex flex-row">
-        <div className="w-1/5 h-full border-r px-2 py-4">
+        <div className="w-1/5 h-full border-r px-2 py-4 overflow-hidden">
           <div className="flex flex-col">
             <div
               className={`flex flex-row items-center px-4 py-2 my-2 rounded cursor-pointer ${
@@ -408,14 +408,14 @@ const Dashboard: React.FC = () => {
             <Loader />
           </div>
         ) : (
-          <div className="w-4/5 h-full p-4 flex flex-col">
+          <div className="w-4/5 h-full p-4 flex flex-col overflow-hidden">
             <div className="w-auto h-auto">
               {selected === 4 ? (
                 <NoteModal submitNote={submitNoteHandler}>
                   <div className="w-48 mobile:w-full mt-2 flex flex-row items-center justify-center py-2 rounded cursor-pointer bg-yellow-200">
                     <RiAddFill />
                     <p className="pl-1 text-sm capitalize">
-                      Add {menuList[selected].name}
+                      {locale.dashboard?.add_note}
                     </p>
                   </div>
                 </NoteModal>
@@ -437,10 +437,8 @@ const Dashboard: React.FC = () => {
                           : selected === 2
                           ? locale.dashboard?.upload_video
                           : selected === 3
-                          ? locale.dashboard?.upload_video
-                          : selected === 4
                           ? locale.dashboard?.upload_audio
-                          : locale.dashboard?.add_note}
+                          : ""}
                       </p>
                     </>
                   )}

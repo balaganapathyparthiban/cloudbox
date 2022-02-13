@@ -20,6 +20,9 @@ const App: React.FC = () => {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    if (localStorage.getItem("gun/")) {
+      localStorage.removeItem("gun/");
+    }
     fetchLocale();
   }, []);
 
