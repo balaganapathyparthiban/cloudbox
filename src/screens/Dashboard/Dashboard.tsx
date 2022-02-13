@@ -1,5 +1,5 @@
 import { RiSearch2Line, RiLogoutCircleRLine, RiAddFill } from "react-icons/ri";
-import { ChangeEvent, useContext, useEffect, useState } from "react";
+import { ChangeEvent, useContext, useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { Web3Storage } from "web3.storage";
 import SHA256 from "crypto-js/sha256";
@@ -37,10 +37,9 @@ const Dashboard: React.FC = () => {
     { name: "audio", accept: "audio/*" },
     { name: "note", accept: "" },
   ];
-
+  const files = useRef<any[]>([]);
   const navigate = useNavigate();
   const [selected, setSelected] = useState(0);
-  const [files, setFiles] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [isUploading, setIsUploading] = useState(false);
   const [downloading, setDownloading] = useState<any>({});
@@ -51,14 +50,24 @@ const Dashboard: React.FC = () => {
       navigate("/");
       return;
     }
-    const searchParams = new URLSearchParams(window.location.search);
-    const tab =
-      searchParams.get("tab") !== null
-        ? parseInt(searchParams.get("tab") as string)
-        : 0;
 
-    updateSelectedTab(tab);
-    fetchFileData(menuList[tab].name);
+    setLoading(true);
+    getDBCollection().then((collection) => {
+      Promise.race([
+        db.get(collection).get("files").get(menuList[0].name),
+        db.get(collection).get("files").get(menuList[1].name),
+        db.get(collection).get("files").get(menuList[2].name),
+        db.get(collection).get("files").get(menuList[3].name),
+        db.get(collection).get("files").get(menuList[4].name),
+      ]).then().catch().finally(() => {
+        const searchParams = new URLSearchParams(window.location.search);
+        const tab =
+          searchParams.get("tab") !== null
+            ? parseInt(searchParams.get("tab") as string)
+            : 0;
+        updateSelectedTab(tab);
+      });
+    });
   }, []);
 
   const getDBCollection = async () => {
@@ -79,12 +88,12 @@ const Dashboard: React.FC = () => {
     return collection.toString();
   };
 
-  const fetchFileData = async (tab: string) => {
+  const fetchFileData = async (tabName: string) => {
+    const collection = await getDBCollection();
     setLoading(true);
 
-    const collection = await getDBCollection();
-    Promise.race([(db.get(collection).get("files").get(tab) as any).then()])
-      .then(async (data) => {
+    Promise.race([db.get(collection).get("files").get(tabName)])
+      .then(async (data: any) => {
         if (!data) return;
 
         try {
@@ -103,8 +112,7 @@ const Dashboard: React.FC = () => {
             })
           );
 
-          filesData = filesData.filter((d) => d);
-          setFiles(filesData);
+          files.current = filesData.filter((d) => d);
         } catch (e) {
           console.log(e);
         }
@@ -199,9 +207,9 @@ const Dashboard: React.FC = () => {
       .get(menuList[selected].name)
       .put({ [new Date().getTime()]: encryptedData });
 
-    setFiles([uploadedData, ...files]);
-    setIsUploading(false);
+    files.current = [uploadedData, ...files.current];
     toast.success(`${uploadedData.name} is uploaded.`);
+    setIsUploading(false);
   };
 
   const fileDownloadHandler = async (file: any) => {
@@ -233,7 +241,7 @@ const Dashboard: React.FC = () => {
       .get(menuList[selected].name)
       .put({ [file.key]: null });
 
-    setFiles(files.filter((f) => f.key != file.key));
+    files.current = files.current.filter((f) => f.key != file.key);
     toast.error(`${file.name} is deleted.`);
 
     await client.delete(file.ontentId);
@@ -282,16 +290,14 @@ const Dashboard: React.FC = () => {
       .put({ [key]: encryptedData });
 
     if (isNew) {
-      setFiles([note, ...files]);
+      files.current = [note, ...files.current];
     } else {
-      setFiles(
-        files.map((file) => {
-          if (file.key == key) {
-            file = note;
-          }
-          return file;
-        })
-      );
+      files.current = files.current.map((file) => {
+        if (file.key == key) {
+          file = note;
+        }
+        return file;
+      });
     }
   };
 
@@ -303,19 +309,18 @@ const Dashboard: React.FC = () => {
       .get(menuList[selected].name)
       .put({ [note.key]: null });
 
-    setFiles(files.filter((f) => f.key != note.key));
+    files.current = files.current.filter((f) => f.key != note.key);
     toast.error(`${note.title} is deleted.`);
   };
 
   const updateSelectedTab = (tab: number) => {
     const searchParams = new URLSearchParams(window.location.search);
     searchParams.set("tab", `${tab}`);
-    const newRelativePathQuery = `${
-      window.location.pathname
-    }?${searchParams.toString()}`;
+    const newRelativePathQuery = `${window.location.pathname
+      }?${searchParams.toString()}`;
     history.pushState(null, "", newRelativePathQuery);
 
-    setFiles([]);
+    files.current = [];
     setSelected(tab);
     fetchFileData(menuList[tab].name);
   };
@@ -355,9 +360,8 @@ const Dashboard: React.FC = () => {
         <div className="w-1/5 h-full border-r px-2 py-4 overflow-hidden">
           <div className="flex flex-col">
             <div
-              className={`flex flex-row items-center px-4 py-2 my-2 rounded cursor-pointer ${
-                selected === 0 ? "bg-yellow-200" : ""
-              }`}
+              className={`flex flex-row items-center px-4 py-2 my-2 rounded cursor-pointer ${selected === 0 ? "bg-yellow-200" : ""
+                }`}
               onClick={() => updateSelectedTab(0)}
             >
               <FaRegFileArchive className="text-xl" />
@@ -366,36 +370,32 @@ const Dashboard: React.FC = () => {
               </p>
             </div>
             <div
-              className={`flex flex-row items-center px-4 py-2 my-2 rounded cursor-pointer ${
-                selected === 1 ? "bg-yellow-200" : ""
-              }`}
+              className={`flex flex-row items-center px-4 py-2 my-2 rounded cursor-pointer ${selected === 1 ? "bg-yellow-200" : ""
+                }`}
               onClick={() => updateSelectedTab(1)}
             >
               <FaRegFileImage className="text-xl" />
               <p className="ml-2 mobile:hidden">{locale.dashboard?.images}</p>
             </div>
             <div
-              className={`flex flex-row items-center px-4 py-2 my-2 rounded cursor-pointer ${
-                selected === 2 ? "bg-yellow-200" : ""
-              }`}
+              className={`flex flex-row items-center px-4 py-2 my-2 rounded cursor-pointer ${selected === 2 ? "bg-yellow-200" : ""
+                }`}
               onClick={() => updateSelectedTab(2)}
             >
               <FaRegFileVideo className="text-xl" />
               <p className="ml-2 mobile:hidden">{locale.dashboard?.videos}</p>
             </div>
             <div
-              className={`flex flex-row items-center px-4 py-2 my-2 rounded cursor-pointer ${
-                selected === 3 ? "bg-yellow-200" : ""
-              }`}
+              className={`flex flex-row items-center px-4 py-2 my-2 rounded cursor-pointer ${selected === 3 ? "bg-yellow-200" : ""
+                }`}
               onClick={() => updateSelectedTab(3)}
             >
               <FaRegFileAudio className="text-xl" />
               <p className="ml-2 mobile:hidden">{locale.dashboard?.audios}</p>
             </div>
             <div
-              className={`flex flex-row items-center px-4 py-2 my-2 rounded cursor-pointer ${
-                selected === 4 ? "bg-yellow-200" : ""
-              }`}
+              className={`flex flex-row items-center px-4 py-2 my-2 rounded cursor-pointer ${selected === 4 ? "bg-yellow-200" : ""
+                }`}
               onClick={() => updateSelectedTab(4)}
             >
               <SiMicrosoftonenote className="text-xl mobile:scale-125" />
@@ -404,7 +404,7 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
         {loading ? (
-          <div className="w-full h-full flex flex-row justify-center items-center">
+          <div className="w-auto h-auto flex flex-row justify-center items-center">
             <Loader />
           </div>
         ) : (
@@ -433,12 +433,12 @@ const Dashboard: React.FC = () => {
                         {selected === 0
                           ? locale.dashboard?.upload_document
                           : selected === 1
-                          ? locale.dashboard?.upload_image
-                          : selected === 2
-                          ? locale.dashboard?.upload_video
-                          : selected === 3
-                          ? locale.dashboard?.upload_audio
-                          : ""}
+                            ? locale.dashboard?.upload_image
+                            : selected === 2
+                              ? locale.dashboard?.upload_video
+                              : selected === 3
+                                ? locale.dashboard?.upload_audio
+                                : ""}
                       </p>
                     </>
                   )}
@@ -453,7 +453,7 @@ const Dashboard: React.FC = () => {
                 </label>
               )}
             </div>
-            {files.length === 0 ? (
+            {files.current.length === 0 ? (
               <div className="w-full h-full flex flex-row justify-center items-center">
                 <p className="text-gray-400">
                   {locale.dashboard?.no_files_found}
@@ -465,7 +465,7 @@ const Dashboard: React.FC = () => {
               style={{ gridColumn: "auto", gridRow: "auto" }}
             >
               {selected == 4 &&
-                files
+                files.current
                   .reverse()
                   .filter((file) => {
                     if (!filter) return true;
@@ -496,7 +496,7 @@ const Dashboard: React.FC = () => {
                     );
                   })}
               {selected !== 4 &&
-                files
+                files.current
                   .reverse()
                   .filter((file) => {
                     if (!filter) return true;
