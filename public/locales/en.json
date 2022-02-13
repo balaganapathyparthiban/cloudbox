@@ -1,0 +1,43 @@
+{
+  "landing": {
+    "title": "Cloud Box",
+    "login": "Login",
+    "username": "Username",
+    "password": "Password",
+    "sub_quote": "Your personal cloud storage",
+    "description": "Open source dapp Powered by Gunjs & Web3.Storage, You can keep notes, files, images, videos and anything without control of anyone.",
+    "grid_1": "Owenerless",
+    "grid_2": "Censorship Resistant",
+    "grid_3": "Anonmous",
+    "grid_4": "Encrypted",
+    "grid_5": "Zero Downtime",
+    "grid_6": "Data Integrity",
+    "grid_7": "Private",
+    "grid_8": "Open Source",
+    "grid_9": "No Tracking"
+  },
+  "dashboard": {
+    "documents": "Documents",
+    "images": "Images",
+    "videos": "Videos",
+    "audios": "Audios",
+    "notes": "Notes",
+    "upload_document": "Upload Document",
+    "upload_image": "Upload Image",
+    "upload_video": "Upload Video",
+    "upload_audio": "Upload Audio",
+    "add_note": "Add Note",
+    "no_files_found": "No files found"
+  },
+  "about": {
+    "content": "Cloud Box is an open source D-APP(Decentralized application) where the data is stored in peer network instead of drive in cloud This application helps to store Documents, Images, Videos, Audios and even Notes in secure way. The files are store in peer network in encrypted format using Web3.Storage & Gun.js."
+  },
+  "footer": {
+    "open_source": "Open Source",
+    "github": "Github",
+    "about": "About",
+    "bginnovate": "@bginnovate",
+    "github_url": "https://github.com/balaganapathyparthiban/cloudbox",
+    "bginnovate_url": "https://bginnovate.com"
+  }
+}
