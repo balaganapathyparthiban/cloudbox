@@ -27,20 +27,12 @@ const App: React.FC = () => {
   }, []);
 
   const fetchLocale = async () => {
-    try {
-      const response = await axios.get(
-        "https://raw.githubusercontent.com/balaganapathyparthiban/cloudbox/master/public/locales/en.json"
-      );
-      setLocale(response.data);
-    } catch {
-      const response = await axios.get("/locales/en.json");
-      setLocale(response.data);
-    }
+    const response = await axios.get("/locales/en.json");
+    setLocale(response.data);
     setLoading(false);
   };
 
   if (loading) return <Loader />;
-
   return (
     <LocaleContext.Provider value={locale}>
       <Switch>
