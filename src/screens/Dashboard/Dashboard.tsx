@@ -40,7 +40,7 @@ const Dashboard: React.FC = () => {
   const files = useRef<any[]>([]);
   const navigate = useNavigate();
   const [selected, setSelected] = useState(0);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [isUploading, setIsUploading] = useState(false);
   const [downloading, setDownloading] = useState<any>({});
   const [filter, setFilter] = useState("");
@@ -51,7 +51,6 @@ const Dashboard: React.FC = () => {
       return;
     }
 
-    setLoading(true);
     getDBCollection().then((collection) => {
       Promise.race([
         db.get(collection).get("files").get(menuList[0].name),
@@ -59,14 +58,17 @@ const Dashboard: React.FC = () => {
         db.get(collection).get("files").get(menuList[2].name),
         db.get(collection).get("files").get(menuList[3].name),
         db.get(collection).get("files").get(menuList[4].name),
-      ]).then().catch().finally(() => {
-        const searchParams = new URLSearchParams(window.location.search);
-        const tab =
-          searchParams.get("tab") !== null
-            ? parseInt(searchParams.get("tab") as string)
-            : 0;
-        updateSelectedTab(tab);
-      });
+      ])
+        .then()
+        .catch()
+        .finally(() => {
+          const searchParams = new URLSearchParams(window.location.search);
+          const tab =
+            searchParams.get("tab") !== null
+              ? parseInt(searchParams.get("tab") as string)
+              : 0;
+          updateSelectedTab(tab);
+        });
     });
   }, []);
 
@@ -316,8 +318,9 @@ const Dashboard: React.FC = () => {
   const updateSelectedTab = (tab: number) => {
     const searchParams = new URLSearchParams(window.location.search);
     searchParams.set("tab", `${tab}`);
-    const newRelativePathQuery = `${window.location.pathname
-      }?${searchParams.toString()}`;
+    const newRelativePathQuery = `${
+      window.location.pathname
+    }?${searchParams.toString()}`;
     history.pushState(null, "", newRelativePathQuery);
 
     files.current = [];
@@ -360,8 +363,9 @@ const Dashboard: React.FC = () => {
         <div className="w-1/5 h-full border-r px-2 py-4 overflow-hidden">
           <div className="flex flex-col">
             <div
-              className={`flex flex-row items-center px-4 py-2 my-2 rounded cursor-pointer ${selected === 0 ? "bg-yellow-200" : ""
-                }`}
+              className={`flex flex-row items-center px-4 py-2 my-2 rounded cursor-pointer ${
+                selected === 0 ? "bg-yellow-200" : ""
+              }`}
               onClick={() => updateSelectedTab(0)}
             >
               <FaRegFileArchive className="text-xl" />
@@ -370,32 +374,36 @@ const Dashboard: React.FC = () => {
               </p>
             </div>
             <div
-              className={`flex flex-row items-center px-4 py-2 my-2 rounded cursor-pointer ${selected === 1 ? "bg-yellow-200" : ""
-                }`}
+              className={`flex flex-row items-center px-4 py-2 my-2 rounded cursor-pointer ${
+                selected === 1 ? "bg-yellow-200" : ""
+              }`}
               onClick={() => updateSelectedTab(1)}
             >
               <FaRegFileImage className="text-xl" />
               <p className="ml-2 mobile:hidden">{locale.dashboard?.images}</p>
             </div>
             <div
-              className={`flex flex-row items-center px-4 py-2 my-2 rounded cursor-pointer ${selected === 2 ? "bg-yellow-200" : ""
-                }`}
+              className={`flex flex-row items-center px-4 py-2 my-2 rounded cursor-pointer ${
+                selected === 2 ? "bg-yellow-200" : ""
+              }`}
               onClick={() => updateSelectedTab(2)}
             >
               <FaRegFileVideo className="text-xl" />
               <p className="ml-2 mobile:hidden">{locale.dashboard?.videos}</p>
             </div>
             <div
-              className={`flex flex-row items-center px-4 py-2 my-2 rounded cursor-pointer ${selected === 3 ? "bg-yellow-200" : ""
-                }`}
+              className={`flex flex-row items-center px-4 py-2 my-2 rounded cursor-pointer ${
+                selected === 3 ? "bg-yellow-200" : ""
+              }`}
               onClick={() => updateSelectedTab(3)}
             >
               <FaRegFileAudio className="text-xl" />
               <p className="ml-2 mobile:hidden">{locale.dashboard?.audios}</p>
             </div>
             <div
-              className={`flex flex-row items-center px-4 py-2 my-2 rounded cursor-pointer ${selected === 4 ? "bg-yellow-200" : ""
-                }`}
+              className={`flex flex-row items-center px-4 py-2 my-2 rounded cursor-pointer ${
+                selected === 4 ? "bg-yellow-200" : ""
+              }`}
               onClick={() => updateSelectedTab(4)}
             >
               <SiMicrosoftonenote className="text-xl mobile:scale-125" />
@@ -403,148 +411,146 @@ const Dashboard: React.FC = () => {
             </div>
           </div>
         </div>
-        {loading ? (
-          <div className="w-auto h-auto flex flex-row justify-center items-center">
-            <Loader />
-          </div>
-        ) : (
-          <div className="w-4/5 h-full p-4 flex flex-col overflow-hidden">
-            <div className="w-auto h-auto">
-              {selected === 4 ? (
-                <NoteModal submitNote={submitNoteHandler}>
-                  <div className="w-48 mobile:w-full mt-2 flex flex-row items-center justify-center py-2 rounded cursor-pointer bg-yellow-200">
+        <div className="w-4/5 h-full p-4 flex flex-col overflow-hidden">
+          <div className="w-auto h-auto">
+            {selected === 4 ? (
+              <NoteModal submitNote={submitNoteHandler}>
+                <div className="w-48 mobile:w-full mt-2 flex flex-row items-center justify-center py-2 rounded cursor-pointer bg-yellow-200">
+                  <RiAddFill />
+                  <p className="pl-1 text-sm capitalize">
+                    {locale.dashboard?.add_note}
+                  </p>
+                </div>
+              </NoteModal>
+            ) : (
+              <label
+                htmlFor="fileUpload"
+                className="w-48 mobile:w-full mt-2 flex flex-row items-center justify-center py-2 rounded cursor-pointer bg-yellow-200"
+              >
+                {isUploading ? (
+                  <p>uploading...</p>
+                ) : (
+                  <>
                     <RiAddFill />
                     <p className="pl-1 text-sm capitalize">
-                      {locale.dashboard?.add_note}
+                      {selected === 0
+                        ? locale.dashboard?.upload_document
+                        : selected === 1
+                        ? locale.dashboard?.upload_image
+                        : selected === 2
+                        ? locale.dashboard?.upload_video
+                        : selected === 3
+                        ? locale.dashboard?.upload_audio
+                        : ""}
                     </p>
-                  </div>
-                </NoteModal>
-              ) : (
-                <label
-                  htmlFor="fileUpload"
-                  className="w-48 mobile:w-full mt-2 flex flex-row items-center justify-center py-2 rounded cursor-pointer bg-yellow-200"
-                >
-                  {isUploading ? (
-                    <p>uploading...</p>
-                  ) : (
-                    <>
-                      <RiAddFill />
-                      <p className="pl-1 text-sm capitalize">
-                        {selected === 0
-                          ? locale.dashboard?.upload_document
-                          : selected === 1
-                            ? locale.dashboard?.upload_image
-                            : selected === 2
-                              ? locale.dashboard?.upload_video
-                              : selected === 3
-                                ? locale.dashboard?.upload_audio
-                                : ""}
-                      </p>
-                    </>
-                  )}
-                  <input
-                    id="fileUpload"
-                    type="file"
-                    className="w-0 h-0 opacity-0"
-                    onChange={fileUploadHandler}
-                    accept={menuList[selected].accept}
-                    disabled={isUploading}
-                  />
-                </label>
-              )}
-            </div>
-            {files.current.length === 0 ? (
-              <div className="w-full h-full flex flex-row justify-center items-center">
-                <p className="text-gray-400">
-                  {locale.dashboard?.no_files_found}
-                </p>
-              </div>
-            ) : null}
-            <div
-              className="grid grid-cols-4 tablet:grid-cols-2 mobile:grid-cols-1 gap-6 mt-6 overflow-x-hidden overflow-y-auto"
-              style={{ gridColumn: "auto", gridRow: "auto" }}
-            >
-              {selected == 4 &&
-                files.current
-                  .reverse()
-                  .filter((file) => {
-                    if (!filter) return true;
-                    if (file.title.includes(filter)) {
-                      return true;
-                    }
-                    return false;
-                  })
-                  .map((file, index) => {
-                    return (
-                      <NoteModal
-                        data={file}
-                        key={[file.title, index].join("_")}
-                        submitNote={submitNoteHandler}
-                        deleteNote={deleteNoteHandler}
-                      >
-                        <div
-                          className="w-auto h-auto border bg-white rounded shadow p-2 cursor-pointer"
-                          style={{ background: file.background }}
-                        >
-                          <p className="text-lg break-words">{file.title}</p>
-                          <p className="text-sm break-words">{file.content}</p>
-                          <p className="text-xs text-gray-400">
-                            {file.createdAt}
-                          </p>
-                        </div>
-                      </NoteModal>
-                    );
-                  })}
-              {selected !== 4 &&
-                files.current
-                  .reverse()
-                  .filter((file) => {
-                    if (!filter) return true;
-                    if (file.name.includes(filter)) {
-                      return true;
-                    }
-                    return false;
-                  })
-                  .map((file, index) => {
-                    return (
-                      <div
-                        className="border bg-white rounded shadow p-2"
-                        key={[file.fileName, index].join("_")}
-                      >
-                        <div className="flex flex-col">
-                          <div className="w-full flex flex-row items-center justify-between">
-                            <p className="text-xl text-gray-400">
-                              {file.extension}
-                            </p>
-                            <div className="flex flex-row">
-                              {downloading[file.key] ? (
-                                <span>...</span>
-                              ) : (
-                                <MdFileDownload
-                                  className="mx-2 text-xl cursor-pointer"
-                                  onClick={() => fileDownloadHandler(file)}
-                                />
-                              )}
-                              <MdDelete
-                                className="text-red-400 text-xl cursor-pointer"
-                                onClick={() => fileDeleteHandler(file)}
-                              />
-                            </div>
-                          </div>
-                          <p className="text-lg">{file.name}</p>
-                          <p className="text-xs text-gray-400">
-                            {calculateFileSize(file.size)}
-                          </p>
-                          <p className="text-xs text-gray-400">
-                            {file.createdAt}
-                          </p>
-                        </div>
-                      </div>
-                    );
-                  })}
-            </div>
+                  </>
+                )}
+                <input
+                  id="fileUpload"
+                  type="file"
+                  className="w-0 h-0 opacity-0"
+                  onChange={fileUploadHandler}
+                  accept={menuList[selected].accept}
+                  disabled={isUploading}
+                />
+              </label>
+            )}
           </div>
-        )}
+          {loading ? (
+            <div className="w-auto h-auto flex flex-row justify-center items-center">
+              <Loader />
+            </div>
+          ) : files.current.length === 0 ? (
+            <div className="w-full h-full flex flex-row justify-center items-center">
+              <p className="text-gray-400">
+                {locale.dashboard?.no_files_found}
+              </p>
+            </div>
+          ) : null}
+          <div
+            className="grid grid-cols-4 tablet:grid-cols-2 mobile:grid-cols-1 gap-6 mt-6 overflow-x-hidden overflow-y-auto"
+            style={{ gridColumn: "auto", gridRow: "auto" }}
+          >
+            {selected == 4 &&
+              files.current
+                .reverse()
+                .filter((file) => {
+                  if (!filter) return true;
+                  if (file.title.includes(filter)) {
+                    return true;
+                  }
+                  return false;
+                })
+                .map((file, index) => {
+                  return (
+                    <NoteModal
+                      data={file}
+                      key={[file.title, index].join("_")}
+                      submitNote={submitNoteHandler}
+                      deleteNote={deleteNoteHandler}
+                    >
+                      <div
+                        className="w-auto h-auto border bg-white rounded shadow p-2 cursor-pointer"
+                        style={{ background: file.background }}
+                      >
+                        <p className="text-lg break-words">{file.title}</p>
+                        <p className="text-sm break-words">{file.content}</p>
+                        <p className="text-xs text-gray-400">
+                          {file.createdAt}
+                        </p>
+                      </div>
+                    </NoteModal>
+                  );
+                })}
+            {selected !== 4 &&
+              files.current
+                .reverse()
+                .filter((file) => {
+                  if (!filter) return true;
+                  if (file.name.includes(filter)) {
+                    return true;
+                  }
+                  return false;
+                })
+                .map((file, index) => {
+                  return (
+                    <div
+                      className="border bg-white rounded shadow p-2"
+                      key={[file.fileName, index].join("_")}
+                    >
+                      <div className="flex flex-col">
+                        <div className="w-full flex flex-row items-center justify-between">
+                          <p className="text-xl text-gray-400">
+                            {file.extension}
+                          </p>
+                          <div className="flex flex-row">
+                            {downloading[file.key] ? (
+                              <span>...</span>
+                            ) : (
+                              <MdFileDownload
+                                className="mx-2 text-xl cursor-pointer"
+                                onClick={() => fileDownloadHandler(file)}
+                              />
+                            )}
+                            <MdDelete
+                              className="text-red-400 text-xl cursor-pointer"
+                              onClick={() => fileDeleteHandler(file)}
+                            />
+                          </div>
+                        </div>
+                        <p className="text-lg">{file.name}</p>
+                        <p className="text-xs text-gray-400">
+                          {calculateFileSize(file.size)}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          {file.createdAt}
+                        </p>
+                      </div>
+                    </div>
+                  );
+                })}
+          </div>
+        </div>
       </div>
       <Footer />
     </div>

@@ -16,7 +16,7 @@ const LoginModal: React.FC<ILoginModal> = (props) => {
   const navigate = useNavigate();
   const userNameRef = useRef<HTMLInputElement>(null);
   const passwordRef = useRef<HTMLInputElement>(null);
-  const [loading, setLoading] = useState(false)
+  const [loading, setLoading] = useState(false);
 
   const setToken = (token: string, username: string) => {
     localStorage.setItem("userName", username);
@@ -30,22 +30,21 @@ const LoginModal: React.FC<ILoginModal> = (props) => {
     const username = userNameRef.current?.value;
     const password = passwordRef.current?.value;
 
-    setLoading(true)
+    setLoading(true);
     user.create(username, password, (createAck: any) => {
       if (createAck.err === "User already created!") {
         user.auth(username, password, (authAck: any) => {
           if (authAck.err) {
             toast.error(authAck.err);
-            setLoading(false)
+            setLoading(false);
             return;
           }
+          setLoading(false);
           setToken(authAck.get, username);
-          setLoading(false)
-          return;
         });
       } else {
+        setLoading(false);
         setToken(createAck.pub, username);
-        setLoading(false)
       }
     });
   };
@@ -74,9 +73,11 @@ const LoginModal: React.FC<ILoginModal> = (props) => {
         </div>
         <div
           className="w-full h-12 my-6 bg-yellow-200 rounded flex flex-row items-center justify-center cursor-pointer"
-          onClick={loading ? () => { } : loginHandler}
+          onClick={loading ? () => {} : loginHandler}
         >
-          <p className="text-center">{loading ? 'loading...' : locale.landing?.login}</p>
+          <p className="text-center">
+            {loading ? "loading..." : locale.landing?.login}
+          </p>
         </div>
       </div>
     </Modal>
