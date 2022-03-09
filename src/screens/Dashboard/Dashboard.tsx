@@ -46,7 +46,11 @@ const Dashboard: React.FC = () => {
   const [filter, setFilter] = useState("");
 
   useEffect(() => {
-    if (!localStorage.getItem("tkn")) {
+    if (
+      !localStorage.getItem("TKN") ||
+      !localStorage.getItem("UC") ||
+      !localStorage.getItem("PC")
+    ) {
       navigate("/");
       return;
     }
@@ -73,14 +77,15 @@ const Dashboard: React.FC = () => {
   }, []);
 
   const getDBCollection = async () => {
-    if (!localStorage.getItem("userName")) {
+    if (!localStorage.getItem("UC") || !localStorage.getItem("PC")) {
       logout();
       return "";
     }
 
     const collection = SHA256(
       JSON.stringify({
-        data: localStorage.getItem("userName") || "",
+        userName: localStorage.getItem("UC"),
+        password: localStorage.getItem("PC"),
         secret: import.meta.env.VITE_DB_HASH
           ? import.meta.env.VITE_DB_HASH.toString()
           : "",
@@ -251,6 +256,8 @@ const Dashboard: React.FC = () => {
 
   const logout = () => {
     localStorage.removeItem("userName");
+    localStorage.removeItem("UC");
+    localStorage.removeItem("PC");
     localStorage.removeItem("tkn");
     navigate("/");
   };

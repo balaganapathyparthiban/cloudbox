@@ -1,6 +1,7 @@
 import { ReactChild, useContext, useRef, useState } from "react";
 import { useNavigate } from "react-router";
 import { toast } from "react-toastify";
+import SHA256 from "crypto-js/sha256";
 
 import { LocaleContext } from "../../../store/store";
 import { user } from "../../../utils/db";
@@ -18,9 +19,11 @@ const LoginModal: React.FC<ILoginModal> = (props) => {
   const passwordRef = useRef<HTMLInputElement>(null);
   const [loading, setLoading] = useState(false);
 
-  const setToken = (token: string, username: string) => {
+  const setToken = (token: string, username: string, password: string) => {
     localStorage.setItem("userName", username);
-    localStorage.setItem("tkn", token);
+    localStorage.setItem("UC", SHA256(username).toString());
+    localStorage.setItem("PC", SHA256(password).toString());
+    localStorage.setItem("TKN", token);
     navigate("/dashboard");
   };
 
@@ -40,12 +43,15 @@ const LoginModal: React.FC<ILoginModal> = (props) => {
             return;
           }
           setLoading(false);
-          setToken(authAck.get, username);
+          setToken(authAck.get, username, password);
         });
+        return;
+      } else if (createAck.pub) {
+        setToken(createAck.pub, username, password);
       } else {
-        setLoading(false);
-        setToken(createAck.pub, username);
+        toast.error(createAck.err);
       }
+      setLoading(false);
     });
   };
 
