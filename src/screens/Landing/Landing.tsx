@@ -60,7 +60,11 @@ const Landing: React.FC = () => {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (localStorage.getItem("tkn")) {
+    if (
+      localStorage.getItem("TKN") &&
+      localStorage.getItem("UC") &&
+      localStorage.getItem("PC")
+    ) {
       navigate("/dashboard");
     }
   }, []);
