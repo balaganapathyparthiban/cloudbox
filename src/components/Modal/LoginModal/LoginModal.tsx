@@ -34,25 +34,33 @@ const LoginModal: React.FC<ILoginModal> = (props) => {
     const password = passwordRef.current?.value;
 
     setLoading(true);
-    user.create(username, password, (createAck: any) => {
-      if (createAck.err === "User already created!") {
-        user.auth(username, password, (authAck: any) => {
-          if (authAck.err) {
-            toast.error(authAck.err);
-            setLoading(false);
-            return;
-          }
-          setLoading(false);
-          setToken(authAck.get, username, password);
-        });
-        return;
-      } else if (createAck.pub) {
-        setToken(createAck.pub, username, password);
-      } else {
-        toast.error(createAck.err);
+    user.create(
+      SHA256(username).toString(),
+      SHA256(password).toString(),
+      (createAck: any) => {
+        if (createAck.err === "User already created!") {
+          user.auth(
+            SHA256(username).toString(),
+            SHA256(password).toString(),
+            (authAck: any) => {
+              if (authAck.err) {
+                toast.error(authAck.err);
+                setLoading(false);
+                return;
+              }
+              setLoading(false);
+              setToken(authAck.get, username, password);
+            }
+          );
+          return;
+        } else if (createAck.pub) {
+          setToken(createAck.pub, username, password);
+        } else {
+          toast.error(createAck.err);
+        }
+        setLoading(false);
       }
-      setLoading(false);
-    });
+    );
   };
 
   return (
